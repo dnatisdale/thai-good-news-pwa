@@ -1,4 +1,4 @@
-"# Dependency directories
+# Dependency directories
 node_modules/
 .build/
 .cache/
@@ -24,6 +24,7 @@ Thumbs.db
 # Logs
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*" > .gitignore
+yarn-error.log*
+
 # Local Netlify folder
-.netlify
+.netlify" > .gitignore

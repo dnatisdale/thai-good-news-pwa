@@ -1,4 +1,4 @@
-'import React from "react";
+import React from "react";
 import { Search, Plus } from "lucide-react";
 import "./App.css";
 
@@ -11,4 +11,4 @@ function App() {
   );
 }
 
-export default App;' > src/App.js
+export default App;
