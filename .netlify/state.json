@@ -1,3 +1,21 @@
 {
-	"siteId": "400bc233-a725-421f-8f2f-1b819e74e8c5"
+	"siteId": "400bc233-a725-421f-8f2f-1b819e74e8c5",
+	"geolocation": {
+		"data": {
+			"city": "El Cajon",
+			"country": {
+				"code": "US",
+				"name": "United States"
+			},
+			"subdivision": {
+				"code": "CA",
+				"name": "California"
+			},
+			"timezone": "America/Los_Angeles",
+			"latitude": 32.8123,
+			"longitude": -116.9172,
+			"postalCode": "92021"
+		},
+		"timestamp": 1753487199530
+	}
 }
