@@ -1,4 +1,4 @@
-echo "# Dependency directories
+"# Dependency directories
 node_modules/
 .build/
 .cache/
