@@ -1,4 +1,4 @@
-echo '{
+{
   "name": "ข่าวดี Thai: Good News",
   "short_name": "GoodNews",
   "start_url": ".",
@@ -12,4 +12,4 @@ echo '{
       "sizes": "192x192"
     }
   ]
-}' > public/manifest.json
+}
