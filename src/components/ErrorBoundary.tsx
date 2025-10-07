@@ -12,7 +12,6 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: any, info: any) {
-    // Optional: send to analytics/logging
     console.error('App crash:', error, info);
   }
 
