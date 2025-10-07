@@ -1,10 +1,14 @@
-// src/sw-update.ts
 export function setupSWUpdate() {
   if (!('serviceWorker' in navigator)) return;
 
+  // TEMP: disable SW in production to rule out stale cache
+  if (import.meta.env.PROD && window.location.hostname !== 'localhost') {
+    return;
+  }
+
   window.addEventListener('load', async () => {
-    try {
-      const reg = await navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+    // ... keep the rest of your registration code here ...
+
 
       // Check periodically (every 60s) while the page is open.
       setInterval(() => reg.update(), 60_000);
