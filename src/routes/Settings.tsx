@@ -1,3 +1,5 @@
+import { useAuth } from '@/hooks/useAuth';
+import { syncNow } from '@/lib/cloud';
 import { normalizeUrl } from '@/lib/url';
 import { useRef, useState } from 'react';
 import { clearAll, importMany } from '@/lib/db';
@@ -13,6 +15,55 @@ function parseCSV(text: string): Omit<SavedLink, 'id' | 'createdAt' | 'updatedAt
   }
   return rows;
 }
+
+const { user, signInWithEmailLink, signOut } = useAuth();
+const [email, setEmail] = useState('');
+const [syncMsg, setSyncMsg] = useState<string | null>(null);
+
+async function onSendLink() {
+  if (!email.trim()) { alert('Enter your email'); return; }
+  try {
+    await signInWithEmailLink(email.trim());
+    alert('Sign-in link sent! Check your email.');
+  } catch (e: any) {
+    alert(`Failed to send link: ${e?.message ?? e}`);
+  }
+}
+
+async function onSyncNow() {
+  if (!user) { alert('Sign in first'); return; }
+  const res = await syncNow(user.uid);
+  setSyncMsg(`Synced — uploaded ${res.up}, downloaded ${res.down}`);
+}
+
+<section className="card">
+  <h2 className="text-lg font-semibold mb-3">Account</h2>
+
+  {!user ? (
+    <div className="space-y-2">
+      <p className="text-sm opacity-80">Sign in to back up and sync your links across devices.</p>
+      <input
+        type="email"
+        className="input"
+        placeholder="you@example.com"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+      />
+      <button className="btn btn-primary" onClick={onSendLink}>Email me a sign-in link</button>
+      <p className="text-xs opacity-70">After you click the link, you’ll return to Settings signed in.</p>
+    </div>
+  ) : (
+    <div className="space-y-2">
+      <p className="text-sm">Signed in as <strong>{user.email}</strong></p>
+      <div className="flex gap-2">
+        <button className="btn btn-primary" onClick={onSyncNow}>Sync now</button>
+        <button className="btn btn-secondary" onClick={() => signOut()}>Sign out</button>
+      </div>
+      {syncMsg && <p className="text-sm opacity-80">{syncMsg}</p>}
+    </div>
+  )}
+</section>
+
 
 export default function Settings() {
   const fileRef = useRef<HTMLInputElement>(null);
