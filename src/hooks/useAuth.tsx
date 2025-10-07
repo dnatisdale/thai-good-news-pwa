@@ -1,6 +1,12 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { User } from 'firebase/auth';
-import { onAuth, startEmailLinkSignIn, finishEmailLinkSignInIfNeeded, signOutNow, initAnalytics } from '@/lib/firebase';
+import {
+  onAuth,
+  startEmailLinkSignIn,
+  finishEmailLinkSignInIfNeeded,
+  signOutNow,
+  initAnalytics
+} from '@/lib/firebase';
 
 type AuthCtx = {
   user: User | null;
@@ -9,17 +15,18 @@ type AuthCtx = {
 };
 
 const Ctx = createContext<AuthCtx>({
-  user: null, signInWithEmailLink: async () => {}, signOut: async () => {}
+  user: null,
+  signInWithEmailLink: async () => {},
+  signOut: async () => {},
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Set up auth + finish email-link flows on load
     finishEmailLinkSignInIfNeeded().catch(console.error);
     const unsub = onAuth(setUser);
-    initAnalytics().catch(() => {}); // non-fatal if unsupported
+    initAnalytics().catch(() => {}); // non-fatal in dev
     return () => unsub();
   }, []);
 
