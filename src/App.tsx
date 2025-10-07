@@ -1,12 +1,14 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import UpdateToast from '@/components/UpdateToast';
+import Toast from '@/components/Toast';
+
 import Home from '@/routes/Home';
 import AddLink from '@/routes/AddLink';
 import Favorites from '@/routes/Favorites';
 import Settings from '@/routes/Settings';
 import About from '@/routes/About';
-import UpdateToast from '@/components/UpdateToast'; // 👈 added
 
 export default function App() {
   return (
@@ -23,15 +25,8 @@ export default function App() {
           </Routes>
         </main>
         <Footer />
-        {/* 👇 shows when a new SW is ready */}
-        import Toast from '@/components/Toast';
-
-// ...
-<Footer />
-<UpdateToast />
-<Toast />   {/* 👈 global toasts */}
-
         <UpdateToast />
+        <Toast />
       </div>
     </BrowserRouter>
   );

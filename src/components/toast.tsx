@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { ToastType } from '@/lib/toast';
 
+type ToastType = 'info' | 'success' | 'error';
 type Item = { id: number; message: string; type: ToastType };
 
 export default function Toast() {
@@ -12,8 +12,8 @@ export default function Toast() {
       const { message, type } = ce.detail || { message: '', type: 'info' as ToastType };
       if (!message) return;
       const id = Date.now() + Math.random();
-      setItems((prev) => [...prev, { id, message, type }]);
-      setTimeout(() => setItems((prev) => prev.filter((x) => x.id !== id)), 4000);
+      setItems(prev => [...prev, { id, message, type }]);
+      setTimeout(() => setItems(prev => prev.filter(x => x.id !== id)), 4000);
     };
     window.addEventListener('toast', handler as any);
     return () => window.removeEventListener('toast', handler as any);
@@ -21,7 +21,7 @@ export default function Toast() {
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] space-y-2">
-      {items.map((i) => (
+      {items.map(i => (
         <div
           key={i.id}
           className={
