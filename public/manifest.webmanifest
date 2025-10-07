@@ -1,0 +1,41 @@
+{
+  "name": "Thai Good News",
+  "short_name": "TGN",
+  "id": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1F4E79",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Link",
+      "url": "/add",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Favorites",
+      "url": "/favorites",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/wide-1280x800.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Home & Search"
+    },
+    {
+      "src": "/screenshots/mobile-1080x1920.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Add Link & QR"
+    }
+  ],
+  "shortcuts_version": 1
+}

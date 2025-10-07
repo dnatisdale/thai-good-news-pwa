@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs><style>.bg{fill:#1F4E79}.accent{fill:#DA291C}.txt{fill:#fff;font:340px sans-serif;font-weight:700}</style></defs>
+  <rect class="bg" x="0" y="0" width="1024" height="1024" rx="200" ry="200"/>
+  <circle class="accent" cx="512" cy="512" r="330"/>
+  <text class="txt" x="50%" y="56%" text-anchor="middle">TGN</text>
+</svg>

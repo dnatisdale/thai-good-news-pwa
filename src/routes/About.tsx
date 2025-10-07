@@ -1,0 +1,1 @@
+import {t} from '@/lib/i18n';export default function About(){return(<div className='max-w-3xl mx-auto px-4 py-6 space-y-3'><h1 className='text-2xl font-bold'>{t('about')}</h1><p>{t('app_title')} — bilingual PWA to safely store, validate (https://), search, import/export, and share URLs. Works offline.</p></div>)}

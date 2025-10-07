@@ -1,0 +1,1 @@
+import {useEffect,useState} from 'react';import {getLang,setLang} from '@/lib/i18n';export function useLanguage(){const[lang,_set]=useState<'en'|'th'>(getLang());useEffect(()=>{document.documentElement.lang=lang},[lang]);return {lang,setLang:(l:'en'|'th')=>{setLang(l);_set(l)}} as const}

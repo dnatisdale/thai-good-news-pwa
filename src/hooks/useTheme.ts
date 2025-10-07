@@ -1,0 +1,1 @@
+import {useEffect,useState} from 'react';import {storage} from '@/lib/storage';type Theme='light'|'dark';const KEY='theme';export function useTheme(){const[theme,setTheme]=useState<Theme>(storage.get(KEY,'light'));useEffect(()=>{document.documentElement.classList.toggle('dark',theme==='dark');storage.set(KEY,theme)},[theme]);return {theme,setTheme} as const}

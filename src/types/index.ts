@@ -1,0 +1,1 @@
+export type Language='th'|'en';export interface SavedLink{ id:string; title:string; url:string; tags:string[]; notes?:string; language:Language; createdAt:number; updatedAt:number; favorite:boolean; source?:'manual'|'import'|'share_target'; }

@@ -1,0 +1,1 @@
+import {useEffect,useState} from 'react';import {storage} from '@/lib/storage';const KEY='fontSize';export function useFontSize(){const[scale,setScale]=useState<number>(storage.get(KEY,100));useEffect(()=>{document.documentElement.style.fontSize=`${scale}%`;storage.set(KEY,scale)},[scale]);return {scale,setScale} as const}

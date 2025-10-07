@@ -1,0 +1,1 @@
+import {t} from '@/lib/i18n';import {useTheme} from '@/hooks/useTheme';export default function ThemeToggle(){const{theme,setTheme}=useTheme();return(<button className='btn btn-secondary' aria-label={t('theme')} onClick={()=>setTheme(theme==='light'?'dark':'light')}>{theme==='light'?t('dark'):t('light')}</button>)}
