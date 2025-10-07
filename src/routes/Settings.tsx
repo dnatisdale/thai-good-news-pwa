@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { syncNow } from '@/lib/cloud';
 import { normalizeUrl } from '@/lib/url';
+import { toast } from '@/lib/toast';
 import { useRef, useState } from 'react';
 import { clearAll, importMany } from '@/lib/db';
 import { t } from '@/lib/i18n';
@@ -21,19 +22,29 @@ const [email, setEmail] = useState('');
 const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
 async function onSendLink() {
-  if (!email.trim()) { alert('Enter your email'); return; }
+  if (!email.trim()) { toast('Enter your email', 'error'); return; }
   try {
     await signInWithEmailLink(email.trim());
-    alert('Sign-in link sent! Check your email.');
+    toast('Sign-in link sent! Check your email.', 'success');
   } catch (e: any) {
-    alert(`Failed to send link: ${e?.message ?? e}`);
+    toast(`Failed to send link: ${e?.message ?? e}`, 'error');
   }
 }
 
 async function onSyncNow() {
-  if (!user) { alert('Sign in first'); return; }
-  const res = await syncNow(user.uid);
-  setSyncMsg(`Synced — uploaded ${res.up}, downloaded ${res.down}`);
+  try {
+    if (!user) { toast('Sign in first', 'error'); return; }
+    const res = await syncNow(user.uid);
+    setSyncMsg(`Synced — uploaded ${res.up}, downloaded ${res.down}`);
+    toast(`Synced: ↑${res.up} ↓${res.down}`, 'success');
+  } catch (e: any) {
+    // Helpful hint if rules still deny access
+    if (e?.code === 'permission-denied') {
+      toast('Cloud blocked by Firestore rules. Allow /users/{uid}/links/* for your uid.', 'error');
+    } else {
+      toast(`Sync failed: ${e?.message ?? e}`, 'error');
+    }
+  }
 }
 
 <section className="card">

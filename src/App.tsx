@@ -24,6 +24,13 @@ export default function App() {
         </main>
         <Footer />
         {/* 👇 shows when a new SW is ready */}
+        import Toast from '@/components/Toast';
+
+// ...
+<Footer />
+<UpdateToast />
+<Toast />   {/* 👈 global toasts */}
+
         <UpdateToast />
       </div>
     </BrowserRouter>
