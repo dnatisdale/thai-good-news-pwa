@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getAll, importMany, clearAll } from '@/lib/db';
 import { normalizeUrl } from '@/lib/url';
 import { syncNow } from '@/lib/cloud';
-import { toast } from '@/lib/Toast';
+import { toast } from '@/lib/toast';
 import type { SavedLink } from '@/types';
 
 export default function Settings() {

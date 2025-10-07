@@ -5,6 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
