@@ -5,3 +5,6 @@ dist
 npm-debug.log*
 pnpm-lock.yaml
 yarn.lock
+
+# Local Netlify folder
+.netlify
