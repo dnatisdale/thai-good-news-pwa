@@ -1,28 +1,39 @@
+// src/routes/Settings.tsx
 import { useState } from 'react';
 import type React from 'react';
+
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { useFontSize } from '@/hooks/useFontSize';
-import { APP_VERSION } from '@/version';
 
-import { getAll, importMany, clearAll } from '@/lib/db';
-import { normalizeUrl } from '@/lib/url';
-import { syncNow } from '@/lib/cloud';
+import { APP_VERSION } from '@/version';
 import { toast } from '@/lib/toast';
+import { normalizeUrl } from '@/lib/url';
+import { getAll, importMany, clearAll } from '@/lib/db';
+import { syncNow } from '@/lib/cloud';
 import type { SavedLink } from '@/types';
 
 export default function Settings() {
+  // i18n, theme, font-size
   const { t, lang, setLang } = useI18n();
+  const { theme, setTheme } = useTheme();        // 'light' | 'dark'
+  const { scale, setScale } = useFontSize();     // % (80–160)
+
+  // auth + sync
   const { user, signInWithEmailLink, signOut } = useAuth();
-  const { scale, setScale } = useFontSize(); // 80–160% slider
   const [email, setEmail] = useState('');
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
-  // --- Account (email link) ---
+  // --- Account actions ---
   const onSendLink = async () => {
     if (!email.trim()) { toast('Enter your email', 'error'); return; }
-    try { await signInWithEmailLink(email.trim()); toast('Sign-in link sent! Check your email.', 'success'); }
-    catch (e: any) { toast(`Failed to send link: ${e?.message ?? e}`, 'error'); }
+    try {
+      await signInWithEmailLink(email.trim());
+      toast('Sign-in link sent! Check your email.', 'success');
+    } catch (e: any) {
+      toast(`Failed to send link: ${e?.message ?? e}`, 'error');
+    }
   };
 
   const onSyncNow = async () => {
@@ -32,8 +43,7 @@ export default function Settings() {
       setSyncMsg(`Synced — uploaded ${res.up}, downloaded ${res.down}`);
       toast(`Synced: ↑${res.up} ↓${res.down}`, 'success');
     } catch (e: any) {
-      if (e?.code === 'permission-denied') toast('Cloud blocked by Firestore rules. Allow /users/{uid}/links/*.', 'error');
-      else toast(`Sync failed: ${e?.message ?? e}`, 'error');
+      toast(`Sync failed: ${e?.message ?? e}`, 'error');
     }
   };
 
@@ -42,30 +52,40 @@ export default function Settings() {
     const data = await getAll();
     const normalized = data.map(d => ({ ...d, url: normalizeUrl(d.url) }));
     const blob = new Blob(['\ufeff' + JSON.stringify(normalized, null, 2)], { type: 'application/json;charset=utf-8' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'links.json'; a.click();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'links.json';
+    a.click();
   };
 
   const onExportCSV = async () => {
     const data = await getAll();
     const normalized = data.map(d => ({ ...d, url: normalizeUrl(d.url) }));
     const header = 'title,url,tags,notes,language,favorite\n';
-    const rows = normalized.map(d => [d.title, d.url, d.tags.join('|'), d.notes ?? '', d.language, String(d.favorite)].join(','));
+    const rows = normalized.map(d =>
+      [d.title, d.url, d.tags.join('|'), d.notes ?? '', d.language, String(d.favorite)].join(',')
+    );
     const blob = new Blob(['\ufeff' + header + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'links.csv'; a.click();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'links.csv';
+    a.click();
   };
 
-  // --- Import (JSON/CSV → normalized) ---
+  // --- Import (JSON/CSV → normalize https) ---
   const onImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     try {
       const text = await file.text();
       let rows: any[] = [];
+
       if (file.name.toLowerCase().endsWith('.json')) {
         rows = JSON.parse(text);
       } else {
+        // Minimal CSV reader: header must be "title,url,tags,notes,language,favorite"
         const lines = text.split(/\r?\n/).filter(Boolean);
-        const header = lines.shift()!;
-        const cols = header.split(',').map(s => s.trim());
+        const hdr = lines.shift()!;
+        const cols = hdr.split(',').map(s => s.trim());
         rows = lines.map(line => {
           const cells = line.split(',');
           const obj: any = {};
@@ -75,11 +95,13 @@ export default function Settings() {
           return obj;
         });
       }
+
       const withIds: SavedLink[] = rows.map(r => {
         const finalUrl = normalizeUrl(r.url);
         let title = r.title;
         if (!title) {
-          try { title = new URL(finalUrl).hostname.replace(/^www\./i, ''); } catch { title = finalUrl; }
+          try { title = new URL(finalUrl).hostname.replace(/^www\./i, ''); }
+          catch { title = finalUrl; }
         }
         return {
           id: crypto.randomUUID(),
@@ -94,6 +116,7 @@ export default function Settings() {
           source: 'import'
         };
       });
+
       const res = await importMany(withIds);
       toast(`Imported: added ${res.added}, skipped ${res.skipped}`, 'success');
       (e.target as HTMLInputElement).value = '';
@@ -105,7 +128,8 @@ export default function Settings() {
 
   const onClearAll = async () => {
     if (!confirm('Delete ALL saved links on this device?')) return;
-    await clearAll(); toast('All local data cleared.', 'success');
+    await clearAll();
+    toast('All local data cleared.', 'success');
   };
 
   return (
@@ -115,7 +139,7 @@ export default function Settings() {
       <section className="card">
         <h2 className="text-lg font-semibold mb-3">{t('language')}</h2>
         <select
-          className="input w-40"
+          className="input w-44"
           value={lang}
           onChange={(e) => setLang(e.target.value as 'en' | 'th')}
           aria-label={t('language')}
@@ -123,12 +147,40 @@ export default function Settings() {
           <option value="en">English</option>
           <option value="th">ไทย (Thai)</option>
         </select>
-        <p className="text-sm opacity-70 mt-2">{t('preview')}: {t('home')} • {t('settings')} • {t('favorites')}</p>
+        <p className="text-sm opacity-70 mt-2">
+          {t('preview')}: {t('home')} • {t('settings')} • {t('favorites')}
+        </p>
       </section>
 
-      {/* Font Size slider */}
+      {/* Appearance: Theme + Font size */}
       <section className="card">
-        <h2 className="text-lg font-semibold mb-3">{t('font_size')}</h2>
+        <h2 className="text-lg font-semibold mb-3">{t('font_size')} & • Theme</h2>
+
+        {/* Theme radios (capitalized) */}
+        <div className="flex items-center gap-4 mb-4">
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="theme"
+              value="light"
+              checked={theme === 'light'}
+              onChange={() => setTheme('light')}
+            />
+            <span>Light</span>
+          </label>
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="theme"
+              value="dark"
+              checked={theme === 'dark'}
+              onChange={() => setTheme('dark')}
+            />
+            <span>Dark</span>
+          </label>
+        </div>
+
+        {/* Font size slider */}
         <div className="flex items-center gap-3">
           <span className="w-10 text-right">{scale}%</span>
           <input
