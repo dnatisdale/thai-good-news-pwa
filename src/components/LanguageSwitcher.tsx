@@ -1,1 +1,16 @@
-import {t} from '@/lib/i18n';import {useLanguage} from '@/hooks/useLanguage';export default function LanguageSwitcher(){const{lang,setLang}=useLanguage();return(<div className='flex items-center gap-2' aria-label={t('language')}><button aria-label={t('english')} className={`btn btn-secondary ${lang==='en'?'ring-2 ring-blue-600':''}`} onClick={()=>setLang('en')}>EN</button><button aria-label={t('thai')} className={`btn btn-secondary ${lang==='th'?'ring-2 ring-blue-600':''}`} onClick={()=>setLang('th')}>ไทย</button></div>)}
+import { useI18n } from '@/lib/i18n';
+
+export default function LanguageSwitcher() {
+  const { lang, setLang } = useI18n();
+  return (
+    <select
+      className="input w-28"
+      value={lang}
+      onChange={(e) => setLang(e.target.value as 'en' | 'th')}
+      aria-label="Language"
+    >
+      <option value="en">EN</option>
+      <option value="th">TH</option>
+    </select>
+  );
+}

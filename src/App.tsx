@@ -10,10 +10,15 @@ import Favorites from '@/routes/Favorites';
 import Settings from '@/routes/Settings';
 import About from '@/routes/About';
 
+import { useI18n } from '@/lib/i18n';
+
 export default function App() {
+  const { lang } = useI18n(); // 👈
+
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
+      {/* Remount everything when language changes */}
+      <div key={lang} className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1">
           <Routes>
