@@ -24,6 +24,11 @@ const DICT: Record<Lang, Record<string, string>> = {
     favorite: 'Favorite',
     unfavorite: 'Unfavorite',
     copied: 'Copied!',
+language: 'Language',
+font_size: 'Font size',
+about_app: 'About this app',
+version: 'Version',
+preview: 'Preview',
   },
   th: {
     app_title: 'ข่าวดีไทย',
@@ -44,6 +49,11 @@ const DICT: Record<Lang, Record<string, string>> = {
     favorite: 'เพิ่มรายการโปรด',
     unfavorite: 'เอาออกจากรายการโปรด',
     copied: 'คัดลอกแล้ว!',
+    language: 'ภาษา',
+font_size: 'ขนาดตัวอักษร',
+about_app: 'เกี่ยวกับแอปนี้',
+version: 'เวอร์ชัน',
+preview: 'ตัวอย่าง',
   }
 };
 

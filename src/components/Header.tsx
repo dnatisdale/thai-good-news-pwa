@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import LanguageSwitcher from './LanguageSwitcher';
 import ThemeToggle from './ThemeToggle';
-import FontSizeButton from './FontSizeButton';
-import { t } from '@/lib/i18n';
+import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const { user } = useAuth();
   const name = user?.email ? user.email.split('@')[0] : null;
 
@@ -17,7 +16,6 @@ export default function Header() {
       <NavLink to="/add" className="btn btn-primary" onClick={()=>setOpen(false)} aria-label={t('add_link')}>+ {t('add_link')}</NavLink>
       <NavLink to="/favorites" className="btn btn-secondary" onClick={()=>setOpen(false)} aria-label={t('favorites')}>{t('favorites')}</NavLink>
       <NavLink to="/settings" className="btn btn-secondary" onClick={()=>setOpen(false)} aria-label={t('settings')}>{t('settings')}</NavLink>
-      <NavLink to="/about" className="btn btn-secondary" onClick={()=>setOpen(false)} aria-label={t('about')}>{t('about')}</NavLink>
     </nav>
   );
 
@@ -45,9 +43,7 @@ export default function Header() {
 
           {/* Controls (desktop) */}
           <div className="hidden sm:flex items-center gap-2">
-            <LanguageSwitcher />
             <ThemeToggle />
-            <FontSizeButton />
             <AccountChip />
           </div>
 
@@ -68,11 +64,7 @@ export default function Header() {
           <div id="mobile-nav" className="md:hidden mt-3 grid gap-2">
             <Nav className="grid gap-2" />
             <div className="flex items-center gap-2">
-              <LanguageSwitcher />
               <ThemeToggle />
-              <div className="hidden xs:block">
-                <FontSizeButton />
-              </div>
               <AccountChip />
             </div>
           </div>
