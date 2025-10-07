@@ -28,6 +28,18 @@ export default function Header() {
     </Link>
   );
 
+{/* Left: logo (mobile) or banner (desktop) */}
+<Link to="/" className="flex items-center gap-2 min-w-0" aria-label={t('app_title')}>
+  {/* Mobile: small square icon */}
+  <img src="/logo.svg" alt="" className="h-7 w-7 shrink-0 sm:hidden" />
+
+  {/* Desktop/Tablet: banner wordmark */}
+  <img src="/banner.svg" alt="Thai Good News" className="hidden sm:block h-9 w-auto" />
+
+  {/* If you still want 'TGN' text on mobile next to the icon, keep this: */}
+  <span className="font-bold text-xl truncate sm:hidden">TGN</span>
+</Link>
+
   const SettingsGear = () => (
     <Link
       to="/settings"
