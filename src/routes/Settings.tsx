@@ -1,5 +1,6 @@
 // src/routes/Settings.tsx
 import { useState } from 'react';
+import type React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getAll, importMany, clearAll } from '@/lib/db';
 import { normalizeUrl } from '@/lib/url';
@@ -8,12 +9,12 @@ import { toast } from '@/lib/toast';
 import type { SavedLink } from '@/types';
 
 export default function Settings() {
-  // ✅ All hooks are INSIDE the component:
+  // ✅ All hooks are INSIDE the component
   const { user, signInWithEmailLink, signOut } = useAuth();
   const [email, setEmail] = useState('');
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
-  async function onSendLink() {
+  const onSendLink = async () => {
     if (!email.trim()) { toast('Enter your email', 'error'); return; }
     try {
       await signInWithEmailLink(email.trim());
@@ -21,9 +22,9 @@ export default function Settings() {
     } catch (e: any) {
       toast(`Failed to send link: ${e?.message ?? e}`, 'error');
     }
-  }
+  };
 
-  async function onSyncNow() {
+  const onSyncNow = async () => {
     try {
       if (!user) { toast('Sign in first', 'error'); return; }
       const res = await syncNow(user.uid);
@@ -36,23 +37,23 @@ export default function Settings() {
         toast(`Sync failed: ${e?.message ?? e}`, 'error');
       }
     }
-  }
+  };
 
-  // ---- Export helpers (normalize https on export) ----
-  async function onExportJSON() {
+  // ---- Export (normalize https) ----
+  const onExportJSON = async () => {
     const data = await getAll();
     const normalized = data.map(d => ({ ...d, url: normalizeUrl(d.url) }));
     const blob = new Blob(
-      ["\ufeff" + JSON.stringify(normalized, null, 2)],
+      ['\ufeff' + JSON.stringify(normalized, null, 2)],
       { type: 'application/json;charset=utf-8' }
     );
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'links.json';
     a.click();
-  }
+  };
 
-  async function onExportCSV() {
+  const onExportCSV = async () => {
     const data = await getAll();
     const normalized = data.map(d => ({ ...d, url: normalizeUrl(d.url) }));
     const header = 'title,url,tags,notes,language,favorite\n';
@@ -66,35 +67,116 @@ export default function Settings() {
         String(d.favorite)
       ].join(',')
     );
-    const blob = new Blob(["\ufeff" + header + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const blob = new Blob(['\ufeff' + header + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'links.csv';
     a.click();
-  }
+  };
 
-  // ---- Import JSON/CSV (normalize to https) ----
-  async function onImport(e: React.ChangeEvent<HTMLInputElement>) {
+  // ---- Import (JSON/CSV, normalize to https) ----
+  const onImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
       const text = await file.text();
       let rows: any[] = [];
+
       if (file.name.toLowerCase().endsWith('.json')) {
         rows = JSON.parse(text);
       } else {
-        // Tiny CSV reader (expects header: title,url,tags,notes,language,favorite)
-        const [first, ...lines] = text.split(/\r?\n/).filter(Boolean);
-        const cols = first.split(',');
+        // Very small CSV reader (expects header line)
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        const header = lines.shift()!;
+        const cols = header.split(',').map(s => s.trim());
         rows = lines.map(line => {
           const cells = line.split(',');
           const obj: any = {};
-          cols.forEach((c, i) => obj[c.trim()] = cells[i] ?? '');
+          cols.forEach((c, i) => { obj[c] = cells[i] ?? ''; });
           if (typeof obj.tags === 'string') obj.tags = obj.tags.split('|').filter(Boolean);
           obj.favorite = String(obj.favorite).toLowerCase() === 'true';
           return obj;
         });
       }
-      const withIds: SavedLink[] = rows.map(r => ({
-        id: crypto.randomUUID(),
-        title: r.title || (new URL(normalizeUrl(r.url)).hostname.replace(/^www\./i
+
+      const withIds: SavedLink[] = rows.map(r => {
+        const finalUrl = normalizeUrl(r.url);
+        let title = r.title;
+        if (!title) {
+          try { title = new URL(finalUrl).hostname.replace(/^www\./i, ''); } catch { title = finalUrl; }
+        }
+        return {
+          id: crypto.randomUUID(),
+          title,
+          url: finalUrl,
+          tags: Array.isArray(r.tags) ? r.tags : [],
+          notes: r.notes || undefined,
+          language: r.language || 'en',
+          favorite: !!r.favorite,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          source: 'import'
+        };
+      });
+
+      const res = await importMany(withIds);
+      toast(`Imported: added ${res.added}, skipped ${res.skipped}`, 'success');
+      (e.target as HTMLInputElement).value = '';
+    } catch (err: any) {
+      console.error(err);
+      toast(`Import failed: ${err?.message ?? err}`, 'error');
+    }
+  };
+
+  const onClearAll = async () => {
+    if (!confirm('Delete ALL saved links on this device?')) return;
+    await clearAll();
+    toast('All local data cleared.', 'success');
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 space-y-6">
+      {/* Account */}
+      <section className="card">
+        <h2 className="text-lg font-semibold mb-3">Account</h2>
+        {!user ? (
+          <div className="space-y-2">
+            <p className="text-sm opacity-80">Sign in to back up and sync your links across devices.</p>
+            <input
+              type="email"
+              className="input"
+              placeholder="you@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
+            <button className="btn btn-primary" onClick={onSendLink}>Email me a sign-in link</button>
+            <p className="text-xs opacity-70">After you click the link, you’ll return to Settings signed in.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-sm">Signed in as <strong>{user.email}</strong></p>
+            <div className="flex gap-2">
+              <button className="btn btn-primary" onClick={onSyncNow}>Sync now</button>
+              <button className="btn btn-secondary" onClick={() => signOut()}>Sign out</button>
+            </div>
+            {syncMsg && <p className="text-sm opacity-80">{syncMsg}</p>}
+          </div>
+        )}
+      </section>
+
+      {/* Import / Export */}
+      <section className="card">
+        <h2 className="text-lg font-semibold mb-3">Import / Export</h2>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn btn-secondary" onClick={onExportJSON}>Export JSON</button>
+          <button className="btn btn-secondary" onClick={onExportCSV}>Export CSV</button>
+          <label className="btn btn-primary cursor-pointer">
+            Import (JSON or CSV)
+            <input type="file" accept=".json,.csv" className="hidden" onChange={onImport} />
+          </label>
+          <button className="btn btn-secondary" onClick={onClearAll}>Clear all (local)</button>
+        </div>
+      </section>
+    </div>
+  );
+}
