@@ -60,11 +60,22 @@ export default function Home() {
       )}
 
       {editing && (
-        <AddEditModal
-          initial={items.find(i=>i.id===editing)!}
-          onCancel={()=>setEditing(null)}
-          onSave={async (data)=>{ /* could add update logic here */ setEditing(null); load(); }}
-        />
+<AddEditModal
+  initial={items.find(i => i.id === editing)!}
+  onCancel={() => setEditing(null)}
+  onSave={async (data) => {
+    // persist edit
+    await updateLink(data.id!, {
+      title: data.title,
+      url: data.url,
+      tags: data.tags,
+      notes: data.notes,
+      language: data.language
+    });
+    setEditing(null);
+    load();
+  }}
+/>
       )}
     </div>
   );

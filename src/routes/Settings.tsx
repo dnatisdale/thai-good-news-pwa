@@ -1,4 +1,4 @@
-
+import { normalizeUrl } from '@/lib/url';
 import { useRef, useState } from 'react';
 import { clearAll, importMany } from '@/lib/db';
 import { t } from '@/lib/i18n';
@@ -23,30 +23,53 @@ export default function Settings() {
     let rows: Omit<SavedLink, 'id' | 'createdAt' | 'updatedAt'>[] = [];
     if (file.name.endsWith('.json')) rows = JSON.parse(text);
     else rows = parseCSV(text);
-    const withIds = rows.map(r => ({ ...r, url: r.url.trim().replace(/^http:\/\//i,'https://'), id: crypto.randomUUID(), createdAt: Date.now(), updatedAt: Date.now() })) as SavedLink[];
+const withIds = rows.map(r => ({
+  ...r,
+  url: normalizeUrl(r.url),           // 👈 use the same normalizer
+  id: crypto.randomUUID(),
+  createdAt: Date.now(),
+  updatedAt: Date.now()
+})) as SavedLink[];
     const { added, skipped } = await importMany(withIds);
     setResult(`${t('import_result')}: ${added} added, ${skipped} skipped`);
   }
 
-  async function onExportJSON() {
-    const data = await (await import('@/lib/db')).getAll();
-    const blob = new Blob(["\ufeff" + JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'links.json';
-    a.click();
-  }
+ async function onExportJSON() {
+  const data = await (await import('@/lib/db')).getAll();
+  const normalized = data.map(d => ({ ...d, url: normalizeUrl(d.url) }));
+  const blob = new Blob(
+    ["\ufeff" + JSON.stringify(normalized, null, 2)],
+    { type: 'application/json;charset=utf-8' }
+  );
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'links.json';
+  a.click();
+}
 
-  async function onExportCSV() {
-    const data = await (await import('@/lib/db')).getAll();
-    const header = 'title,url,tags,notes,language,favorite\n';
-    const rows = data.map(d => [d.title, d.url, d.tags.join('|'), d.notes ?? '', d.language, String(d.favorite)].join(','));
-    const blob = new Blob(["\ufeff" + header + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'links.csv';
-    a.click();
-  }
+ async function onExportCSV() {
+  const data = await (await import('@/lib/db')).getAll();
+  const normalized = data.map(d => ({ ...d, url: normalizeUrl(d.url) }));
+  const header = 'title,url,tags,notes,language,favorite\n';
+  const rows = normalized.map(d =>
+    [
+      d.title,
+      d.url,                            // <- normalized
+      d.tags.join('|'),
+      d.notes ?? '',
+      d.language,
+      String(d.favorite)
+    ].join(',')
+  );
+  const blob = new Blob(
+    ["\ufeff" + header + rows.join('\n')],
+    { type: 'text/csv;charset=utf-8' }
+  );
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'links.csv';
+  a.click();
+}
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
